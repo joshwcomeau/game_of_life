@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Game of Life</title>
+
+<link rel="stylesheet" type="text/css" href="normalize.css">
+<link rel="stylesheet" type="text/css" href="style.css">
+
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+
+<script>
+$(document).ready(function() {
+  var canvas = document.getElementById("gameBoard");
+  if ( canvas.getContext ) {
+    var ctx = canvas.getContext("2d");
+
+  }
+}); 
+</script>  
+<!--[if lt IE 9]>
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+</head>
+
+<body>
+<canvas id="gameBoard" width="500" height="300" style="border: 1px solid #CCC;"></canvas>
+</body>
+</html>
