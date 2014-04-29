@@ -12,13 +12,29 @@
 
 <script>
 $(document).ready(function() {
-  window.game = new Game(35, 1);
-  window.game.randomize();
+  window.game = new Game(25, 1);
+  //window.game.randomize();
   
-  // Add or remove cells by clicking.
-  $(".cell > div").click(function() {
+
+
+ $(document).mousedown(function() {
+    $(".cell > div").bind('mouseover',function(){
+      var cellID = $(this).parent().attr("id");
+      if ($(this).attr("class") == 'dead') {
+        $(this).attr("class","living");
+        window.game.census[cellID] = true;
+      } else {
+        $(this).attr("class","dead");
+        delete window.game.census[cellID];
+      }
+    });
+  }).mouseup(function() {
+    $(".cell > div").unbind('mouseover');
+  });
+
+  $(".cell > div").mousedown(function() {
     var cellID = $(this).parent().attr("id");
-    if ($(this).html() == '') {
+    if ($(this).attr("class") == 'dead') {
       $(this).attr("class","living");
       window.game.census[cellID] = true;
     } else {
@@ -52,8 +68,10 @@ function Game(cellSize, tickLength) {
 
   this.running = false;
 
-  // A hash of all living cells.
-  this.census = {};         
+  // A hash of all living cells, plus our next-turn list of live and dead cells
+  this.census = {};
+  this.liveCensus = {};
+  this.deadCensus = {};         
 
 
 
@@ -91,6 +109,11 @@ function Game(cellSize, tickLength) {
         cellY = parseInt(cellCoords[2]),
         liveNeighbors = [],
         deadNeighbors = [];
+
+    // Don't run on cells way outside the screen grid
+    if ( cellX > (this.numRows * 1.10) || cellY > (this.numCols * 1.10) ) {
+      return 0;
+    }
 
     // Build cell array
     neighborhood = [ 
@@ -141,11 +164,8 @@ function Game(cellSize, tickLength) {
 
     // Start our game loop!
     this.gameLoop = setInterval(function() {
-      console.log("Tick!");
-
-      // Our two new groups of live and dead cells.
-      var liveCensus = {},
-          deadCensus = {};
+      this.liveCensus = {};
+      this.deadCensus = {};
 
 
 
