@@ -80,6 +80,11 @@ function Game(cellSize, tickLength) {
     })
   }
 
+  this.born = function(cellID) {
+    $("#"+cellID+ " div").addClass("living");
+    window.game.census[cellID] = true;
+  }
+
   this.getNeighbors = function(cell, returnMode) {
     var cellCoords = cell.split("-"), // turns 'cell-2-14' into an array. FIrst value is a throwaway
         cellX = parseInt(cellCoords[1]),
