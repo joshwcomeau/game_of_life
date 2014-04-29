@@ -12,12 +12,184 @@
 
 <script>
 $(document).ready(function() {
-  var canvas = document.getElementById("gameBoard");
-  if ( canvas.getContext ) {
-    var ctx = canvas.getContext("2d");
+  window.game = new Game(40, 1);
+  window.game.randomize();
+  
+  // Add or remove cells by clicking.
+  $(".cell > div").click(function() {
+    var cellID = $(this).parent().attr("id");
+    if ($(this).html() == '') {
+      $(this).append("<div class='living'></div>");
+      window.game.census[cellID] = true;
+    } else {
+      $(this).html("");
+      delete window.game.census[cellID];
+    }
+  });
+
+  // Bind the start button
+  $("#startButton").click(function() {
+    if ( window.game.running ) {
+      $(this).attr("value", "Resume Game");
+      window.game.stop();
+    } else {
+      $(this).attr("value", "Pause Game");
+      window.game.start();
+    }
+  })
+
+}); 
+
+
+function Game(cellSize, tickLength) {
+  this.cellSize = cellSize;
+  this.tickLength = tickLength;
+
+  this.boardWidth = $("#gameBoard").width();
+  this.boardHeight = $("#gameBoard").height();
+  this.numRows = Math.floor(this.boardHeight / this.cellSize);
+  this.numCols = Math.floor(this.boardWidth / this.cellSize);
+
+  this.running = false;
+
+  // A hash of all living cells.
+  this.census = {};         
+
+
+
+  this.initialize = function() {
+    this.cells = [];
+    var currentCell;
+
+    for (var row=0; row < this.numRows; row++) {
+      var cellRow = [];
+      for (var col=0; col < this.numCols; col++) {
+
+        currentCell = "cell-"+row+"-"+col;
+        cellRow.push(currentCell);
+
+        $("#gameBoard").append("<div class='cell' id='" + currentCell + "'><div></div></div>")
+      }
+      this.cells.push(cellRow);
+    }
+
+    // Adjust our cell size to match our JS values
+    $(".cell").css({
+      width  : this.cellSize+"px",
+      height : this.cellSize+"px"
+    })
+  }
+
+  this.getNeighbors = function(cell, returnMode) {
+    var cellCoords = cell.split("-"), // turns 'cell-2-14' into an array. FIrst value is a throwaway
+        cellX = parseInt(cellCoords[1]),
+        cellY = parseInt(cellCoords[2]),
+        liveNeighbors = [],
+        deadNeighbors = [];
+
+    // Build cell array
+    neighborhood = [ 
+      "cell-" + (cellX-1) + "-" + (cellY-1),
+      "cell-" + (cellX-1) + "-" + (cellY  ),
+      "cell-" + (cellX-1) + "-" + (cellY+1),
+      "cell-" + (cellX  ) + "-" + (cellY-1),
+      "cell-" + (cellX  ) + "-" + (cellY+1),
+      "cell-" + (cellX+1) + "-" + (cellY-1),
+      "cell-" + (cellX+1) + "-" + (cellY  ),
+      "cell-" + (cellX+1) + "-" + (cellY+1),
+    ]
+
+    for ( var neighbor in neighborhood ) {
+      if ( window.game.census.hasOwnProperty(neighborhood[neighbor]) ) {
+        liveNeighbors.push(neighborhood[neighbor]);
+      } else {
+        deadNeighbors.push(neighborhood[neighbor]);
+      }
+    }
+
+    if (returnMode == 'Array') {
+      return [ liveNeighbors, deadNeighbors ];
+    } else {
+      return liveNeighbors.length;
+    }
 
   }
-}); 
+
+  this.randomize = function() {
+    for ( cellrow in this.cells ) {
+      for ( cell in this.cells[cellrow]) {
+        var populate = Math.round(Math.random());
+        if ( populate ) {
+          console.log("whee");
+          $("#"+this.cells[cellrow][cell]).children().append("<div class='living'></div>");
+          this.census[this.cells[cellrow][cell]] = true;
+        }
+      }
+    }
+  }
+
+  this.stop = function() {
+    this.running = false;
+    clearInterval(window.game.gameLoop);
+  }
+  this.start = function() {
+    this.running = true;
+
+    // Start our game loop!
+    this.gameLoop = setInterval(function() {
+      console.log("Tick!");
+
+      // Our two new groups of live and dead cells.
+      var liveCensus = {},
+          deadCensus = {};
+
+
+
+      // Iterate through our alive cells, getting neighbor-lists.
+      for ( cell in window.game.census ) {
+        // cell = cell-5-18
+        // window.game.census[cell] = true/false
+       
+        var neighborArray = window.game.getNeighbors(cell, "Array");
+        var deadNeighbors = neighborArray[1],
+            numOfLiveNeighbors = neighborArray[0].length;
+
+
+
+        // Add the dead neighbors to our dead census
+        for ( corpse in deadNeighbors ) {
+          deadCensus[deadNeighbors[corpse]] = true;
+        }
+
+
+        // Figure out if this cell lives on or not.
+        if ( numOfLiveNeighbors > 1 && numOfLiveNeighbors < 4 ) {
+          liveCensus[cell] = true;
+        } else {
+          $("#"+cell).children().empty();
+        }
+      }
+
+      // Iterate through our corpses, reanimating the ones with exactly 3 neighbors.
+      for ( corpse in deadCensus ) {
+        if ( window.game.getNeighbors(corpse, "Count") == 3 ) {
+          liveCensus[corpse] = true;
+          $("#"+corpse).children().append("<div class='living'></div>");
+        }
+      }
+
+      // Our loop done, update the census
+      window.game.census = liveCensus;
+
+
+    }, this.tickLength);
+  }
+
+  this.initialize();
+
+}
+
+
 </script>  
 <!--[if lt IE 9]>
 <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -25,6 +197,9 @@ $(document).ready(function() {
 </head>
 
 <body>
-<canvas id="gameBoard" width="500" height="300" style="border: 1px solid #CCC;"></canvas>
+<div id="start">
+  <input type="button" id="startButton" value="Start Game">
+</div>
+<div id="gameBoard"></div>
 </body>
 </html>
