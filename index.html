@@ -12,17 +12,17 @@
 
 <script>
 $(document).ready(function() {
-  window.game = new Game(30, 1);
+  window.game = new Game(35, 1);
   window.game.randomize();
   
   // Add or remove cells by clicking.
   $(".cell > div").click(function() {
     var cellID = $(this).parent().attr("id");
     if ($(this).html() == '') {
-      $(this).append("<div class='living'></div>");
+      $(this).attr("class","living");
       window.game.census[cellID] = true;
     } else {
-      $(this).html("");
+      $(this).attr("class","dead");
       delete window.game.census[cellID];
     }
   });
@@ -68,7 +68,7 @@ function Game(cellSize, tickLength) {
         currentCell = "cell-"+row+"-"+col;
         cellRow.push(currentCell);
 
-        $("#gameBoard").append("<div class='cell' id='" + currentCell + "'><div></div></div>")
+        $("#gameBoard").append("<div class='cell' id='" + currentCell + "'><div class='dead'></div></div>")
       }
       this.cells.push(cellRow);
     }
@@ -125,8 +125,7 @@ function Game(cellSize, tickLength) {
       for ( cell in this.cells[cellrow]) {
         var populate = Math.round(Math.random());
         if ( populate ) {
-          console.log("whee");
-          $("#"+this.cells[cellrow][cell]).children().append("<div class='living'></div>");
+          $("#"+this.cells[cellrow][cell]).children().attr("class","living");
           this.census[this.cells[cellrow][cell]] = true;
         }
       }
@@ -171,7 +170,7 @@ function Game(cellSize, tickLength) {
         if ( numOfLiveNeighbors > 1 && numOfLiveNeighbors < 4 ) {
           liveCensus[cell] = true;
         } else {
-          $("#"+cell).children().empty();
+          $("#"+cell).children().attr("class","dead");
         }
       }
 
@@ -179,7 +178,7 @@ function Game(cellSize, tickLength) {
       for ( corpse in deadCensus ) {
         if ( window.game.getNeighbors(corpse, "Count") == 3 ) {
           liveCensus[corpse] = true;
-          $("#"+corpse).children().append("<div class='living'></div>");
+          $("#"+corpse).children().attr("class","living");
         }
       }
 
