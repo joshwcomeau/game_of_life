@@ -12,7 +12,7 @@
 
 <script>
 $(document).ready(function() {
-  window.game = new Game(30, 1);
+  window.game = new Game(30,5);
   window.game.gliderGun();
   
 
@@ -103,11 +103,11 @@ function Game(cellSize, tickLength) {
     window.game.census[cellID] = true;
   }
 
-  this.getNeighbors = function(cell, returnMode) {
+  this.getNeighbors = function(cell) {
     var cellCoords = cell.split("-"), // turns 'cell-2-14' into an array. FIrst value is a throwaway
         cellX = parseInt(cellCoords[1]),
         cellY = parseInt(cellCoords[2]),
-        liveNeighbors = [],
+        liveNeighbors = 0,
         deadNeighbors = [];
 
     // Don't run on cells way outside the screen grid
@@ -129,17 +129,13 @@ function Game(cellSize, tickLength) {
 
     for ( var neighbor in neighborhood ) {
       if ( window.game.census.hasOwnProperty(neighborhood[neighbor]) ) {
-        liveNeighbors.push(neighborhood[neighbor]);
+        liveNeighbors++;
       } else {
-        deadNeighbors.push(neighborhood[neighbor]);
+        window.game.deadCensus[neighborhood[neighbor]] = (window.game.deadCensus[neighborhood[neighbor]] + 1) || 1
       }
     }
 
-    if (returnMode == 'Array') {
-      return [ liveNeighbors, deadNeighbors ];
-    } else {
-      return liveNeighbors.length;
-    }
+    return liveNeighbors;
 
   }
 
@@ -184,46 +180,37 @@ function Game(cellSize, tickLength) {
 
     // Start our game loop!
     this.gameLoop = setInterval(function() {
-      this.liveCensus = {};
-      this.deadCensus = {};
-
+      window.game.liveCensus = {};
+      window.game.deadCensus = {};
 
 
       // Iterate through our alive cells, getting neighbor-lists.
       for ( cell in window.game.census ) {
-        // cell = cell-5-18
-        // window.game.census[cell] = true/false
        
-        var neighborArray = window.game.getNeighbors(cell, "Array");
-        var deadNeighbors = neighborArray[1],
-            numOfLiveNeighbors = neighborArray[0].length;
+        var numOfLiveNeighbors = window.game.getNeighbors(cell);
 
 
 
-        // Add the dead neighbors to our dead census
-        for ( corpse in deadNeighbors ) {
-          deadCensus[deadNeighbors[corpse]] = true;
-        }
 
 
         // Figure out if this cell lives on or not.
         if ( numOfLiveNeighbors > 1 && numOfLiveNeighbors < 4 ) {
-          liveCensus[cell] = true;
+          window.game.liveCensus[cell] = true;
         } else {
           $("#"+cell).children().attr("class","dead");
         }
       }
 
       // Iterate through our corpses, reanimating the ones with exactly 3 neighbors.
-      for ( corpse in deadCensus ) {
-        if ( window.game.getNeighbors(corpse, "Count") == 3 ) {
-          liveCensus[corpse] = true;
+      for ( corpse in window.game.deadCensus ) {
+        if ( window.game.deadCensus[corpse] == 3 ) {
+          window.game.liveCensus[corpse] = true;
           $("#"+corpse).children().attr("class","living");
         }
       }
 
       // Our loop done, update the census
-      window.game.census = liveCensus;
+      window.game.census = window.game.liveCensus;
 
 
     }, this.tickLength);
