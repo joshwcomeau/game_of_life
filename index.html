@@ -21,12 +21,11 @@ $(document).ready(function() {
  $(document).mousedown(function() {
     $(".cell > div").bind('mouseover',function(){
       var cellID = $(this).parent().attr("id");
-      if ($(this).attr("class") == 'dead') {
-        $(this).attr("class","living");
-        window.game.census[cellID] = true;
+      if ($(this).attr("class") == 'living') {
+        window.game.dead(cellID);
+        
       } else {
-        $(this).attr("class","dead");
-        delete window.game.census[cellID];
+        window.game.born(cellID);
       }
     });
   }).mouseup(function() {
@@ -35,12 +34,11 @@ $(document).ready(function() {
 
   $(".cell > div").mousedown(function() {
     var cellID = $(this).parent().attr("id");
-    if ($(this).attr("class") == 'dead') {
-      $(this).attr("class","living");
-      window.game.census[cellID] = true;
+    if ($(this).attr("class") == 'living') {
+      window.game.dead(cellID);
     } else {
-      $(this).attr("class","dead");
-      delete window.game.census[cellID];
+      window.game.born(cellID);
+      
     }
   });
 
@@ -100,8 +98,13 @@ function Game(cellSize, tickLength) {
   }
 
   this.born = function(cellID) {
-    $("#"+cellID+ " div").addClass("living");
+    $("#"+cellID+ " div").attr("class","living");
     window.game.census[cellID] = true;
+  }
+
+  this.dead = function(cellID) {
+    $("#"+cellID+ " div").attr("class","dead");
+    delete window.game.census[cellID];  
   }
 
   this.getNeighbors = function(cell) {
