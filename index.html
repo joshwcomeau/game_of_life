@@ -5,7 +5,7 @@
 <title>Game of Life</title>
 
 <link rel="stylesheet" type="text/css" href="normalize.css">
-<link rel="stylesheet" type="text/css" href="style_dark.css">
+<link rel="stylesheet" type="text/css" href="style_light.css">
 <link rel="stylesheet" type="text/css" href="style_gameoptions.css">
 
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
@@ -14,7 +14,7 @@
 <script>
 $(document).ready(function() {
   window.game = new Game(30,55);
-  window.game.gliderGun();
+  window.game.randomize();
   
 
 
@@ -198,7 +198,7 @@ function Game(cellSize, tickLength) {
         if ( numOfLiveNeighbors > 1 && numOfLiveNeighbors < 4 ) {
           window.game.liveCensus[cell] = true;
         } else {
-          $("#"+cell).children().attr("class","dead");
+          $("#"+cell).children().attr("class","dead_corpse");
         }
       }
 

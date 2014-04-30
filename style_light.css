@@ -78,3 +78,7 @@ body {
   .dead {
     background: #FCFCFC;
   }
+
+  .dead_corpse {
+    background: #E0E0E0;
+  }
