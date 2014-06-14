@@ -13,8 +13,8 @@
 
 <script>
 $(document).ready(function() {
-  window.game = new Game(25,1);
-  window.game.gliderGun();
+  window.game = new Game(8,1);
+  window.game.randomize();
 
 
  $(document).mousedown(function() {
@@ -81,7 +81,7 @@ function Game(cellSize, tickLength) {
       var cellRow = [];
       for (var col=0; col < this.numCols; col++) {
 
-        currentCell = "cell-"+(row+1)+"-"+(col+1);
+        currentCell = "cell-"+row+"-"+col;
         cellRow.push(currentCell);
 
         $("#gameBoard").append("<div class='cell' id='" + currentCell + "'><div class='dead'></div></div>")
@@ -119,38 +119,16 @@ function Game(cellSize, tickLength) {
     }
 
     // Build cell array
-    // neighborhood = [ 
-    //   "cell-" + (cellX-1) + "-" + (cellY-1),
-    //   "cell-" + (cellX-1) + "-" + (cellY  ),
-    //   "cell-" + (cellX-1) + "-" + (cellY+1),
-    //   "cell-" + (cellX  ) + "-" + (cellY-1),
-    //   "cell-" + (cellX  ) + "-" + (cellY+1),
-    //   "cell-" + (cellX+1) + "-" + (cellY-1),
-    //   "cell-" + (cellX+1) + "-" + (cellY  ),
-    //   "cell-" + (cellX+1) + "-" + (cellY+1),
-    // ]
-    var neighborhood = [];
-
-    for ( var x=(cellX-1); x<=(cellX+1); x++ ) {
-      // Make sure we aren't counting cells outside our field, on the X axis.
-      if ( x < 1 || x > window.game.numRows ) {
-        continue;
-      }
-      for ( var y=(cellY-1); y<=(cellY+1); y++ ) {
-        // Make sure we're skipping our center point
-        if ( x == cellX && y == cellY ) {
-          continue;
-        }
-        // Make sure we aren't counting cells outside our field of play, in the Y axis
-        if ( y < 1 || y > window.game.numCols ) {
-          break;
-        }
-
-        // Add this cell to the neighbors array.
-        neighborhood.push("cell-"+x+"-"+y);
-      }
-    }
-
+    neighborhood = [ 
+      "cell-" + (cellX-1) + "-" + (cellY-1),
+      "cell-" + (cellX-1) + "-" + (cellY  ),
+      "cell-" + (cellX-1) + "-" + (cellY+1),
+      "cell-" + (cellX  ) + "-" + (cellY-1),
+      "cell-" + (cellX  ) + "-" + (cellY+1),
+      "cell-" + (cellX+1) + "-" + (cellY-1),
+      "cell-" + (cellX+1) + "-" + (cellY  ),
+      "cell-" + (cellX+1) + "-" + (cellY+1),
+    ]
 
     for ( var neighbor in neighborhood ) {
       if ( window.game.census.hasOwnProperty(neighborhood[neighbor]) ) {
@@ -205,6 +183,7 @@ function Game(cellSize, tickLength) {
 
     // Start our game loop!
     this.gameLoop = setInterval(function() {
+      console.log("Blip");
       window.game.liveCensus = {};
       window.game.deadCensus = {};
 
@@ -222,8 +201,8 @@ function Game(cellSize, tickLength) {
         if ( numOfLiveNeighbors > 1 && numOfLiveNeighbors < 4 ) {
           window.game.liveCensus[cell] = true;
         } else {
-          $("#"+cell).children().attr("class","dead_corpse");
-          // document.getElementById(cell).childNodes[0].className = "dead_corpse";
+          // $("#"+cell).children().attr("class","dead_corpse");
+          document.getElementById(cell).childNodes[0].className = "dead_corpse";
         }
       }
 
@@ -233,6 +212,7 @@ function Game(cellSize, tickLength) {
           window.game.liveCensus[corpse] = true;
 
           // $("#"+corpse).children().attr("class","living")
+          console.log(corpse);
           document.getElementById(corpse).childNodes[0].className = "living";
 
         }
